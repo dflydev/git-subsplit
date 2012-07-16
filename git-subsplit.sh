@@ -31,13 +31,11 @@ eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
 # We can run this from anywhere.
 NONGIT_OK=1
 
-GIT_EXEC_PATH=$(git --exec-path)
-
-PATH=$PATH:$GIT_EXEC_PATH
+PATH=$PATH:$(git --exec-path)
 
 . git-sh-setup
 
-if [ ! -e "${GIT_EXEC_PATH}/git-subtree" ]
+if [ "$(hash git-subtree &>/dev/null && echo OK)" = "" ]
 then
 	die "Git subplit needs git subtree; install git subtree or upgrade git to >=1.7.11"
 fi
@@ -197,7 +195,7 @@ subsplit_publish()
 					echo \# $PUSH_CMD
 					$PUSH_CMD
 				else
-					$PUSH_CM
+					$PUSH_CMD
 				fi
 			fi
 		done
