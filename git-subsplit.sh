@@ -38,7 +38,7 @@ PATH=$PATH:$GIT_EXEC_PATH
 
 if [ ! -e "${GIT_EXEC_PATH}/git-subtree" ]
 then
-	die "Git subplit relies on git subtree; please install git subtree or upgrade git"
+	die "Git subplit needs git subtree; install git subtree or upgrade git to >=1.7.11"
 fi
 
 ANNOTATE=
