@@ -30,9 +30,16 @@ eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
 # We can run this from anywhere.
 NONGIT_OK=1
 
-PATH=$PATH:$(git --exec-path)
+GIT_EXEC_PATH=$(git --exec-path)
+
+PATH=$PATH:$GIT_EXEC_PATH
 
 . git-sh-setup
+
+if [ ! -e "${GIT_EXEC_PATH}/git-subtree" ]
+then
+	die "Git subplit relies on git subtree; please install git subtree or upgrade git"
+fi
 
 ANNOTATE=
 QUIET=
@@ -132,7 +139,7 @@ subsplit_publish()
 	if [ -z "$TAGS" ] && [ -z "$NO_TAGS" ]
 	then
 		# If tags are not specified and we want tags, discover them.
-		TAGS="$(git ls-remote origin 2>/dev/null | grep -v "^{}" | grep "refs/tags/" | cut -f3 -d/)"
+		TAGS="$(git ls-remote origin 2>/dev/null | grep -v "\^{}" | grep "refs/tags/" | cut -f3 -d/)"
 	fi
 
 	for SPLIT in $SPLITS
