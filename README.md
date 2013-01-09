@@ -152,4 +152,4 @@ Community
 ---------
 
 If you have questions or want to help out, join us in the
-[#dflydev](irc://irc.freenode.net/#dflydev) channel on irc.freenode.net.
+**#dflydev** channel on irc.freenode.net.
