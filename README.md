@@ -9,7 +9,6 @@ in your version of git (likely true for versions older than 1.7.11)
 please install it manually from [here](https://github.com/apenwarr/git-subtree).
 
 
-
 Install
 -------
 
@@ -19,6 +18,14 @@ git-subsplit can be installed and run standalone by executing
 git-subsplit can also be installed as a git command by:
 
     ./install.sh
+
+
+Hooks
+-----
+
+### GitHub WebHooks
+
+ * [dflydev GitHub WebHook](https://github.com/dflydev/dflydev-git-subsplit-github-webhook) (**PHP**)
 
 
 Usage
