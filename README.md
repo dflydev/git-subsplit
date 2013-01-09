@@ -4,6 +4,11 @@ Git Subsplit
 Automate and simplify the process of managing one-way read-only
 subtree splits.
 
+Git subsplit relies on `subtree` being available. If is not available
+in your version of git (likely true for versions older than 1.7.11)
+please install it manually from [here][https://github.com/apenwarr/git-subtree].
+
+
 
 Install
 -------
