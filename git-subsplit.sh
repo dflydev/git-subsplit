@@ -166,7 +166,6 @@ subsplit_publish()
 			fi
 			LOCAL_BRANCH="${REMOTE_NAME}-branch-${HEAD}"
 			say " - syncing branch '${HEAD}'"
-			git branch -D "$LOCAL_BRANCH" >/dev/null 2>&1
 			git subtree split -q --prefix="$SUBPATH" --branch="$LOCAL_BRANCH" "origin/${HEAD}" >/dev/null
 			if [ $? -eq 0 ]
 			then
@@ -179,6 +178,7 @@ subsplit_publish()
 					$PUSH_CMD
 				fi
 			fi
+			git branch -D "$LOCAL_BRANCH" >/dev/null 2>&1
 		done
 
 		for TAG in $TAGS
@@ -196,7 +196,6 @@ subsplit_publish()
 			fi
 			say " - syncing tag '${TAG}'"
 			say " - deleting '${LOCAL_TAG}'"
-			git branch -D "$LOCAL_TAG" >/dev/null 2>&1
 			say " - subtree split for '${TAG}'"
 			git subtree split -q --annotate="${ANNOTATE}" --prefix="$SUBPATH" --branch="$LOCAL_TAG" "$TAG" >/dev/null
 			say " - subtree split for '${TAG}' [DONE]"
@@ -211,6 +210,7 @@ subsplit_publish()
 					$PUSH_CMD
 				fi
 			fi
+			git branch -D "$LOCAL_TAG" >/dev/null 2>&1
 		done
 	done
 
