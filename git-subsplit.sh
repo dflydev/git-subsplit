@@ -191,7 +191,7 @@ subsplit_publish()
 			LOCAL_TAG="${REMOTE_NAME}-tag-${TAG}"
 			if git branch | grep "${LOCAL_TAG}$" >/dev/null && [ -z "$REBUILD_TAGS" ]
 			then
-				say " - skpping tag '${TAG}' (already synced)"
+				say " - skipping tag '${TAG}' (already synced)"
 				continue
 			fi
 			say " - syncing tag '${TAG}'"
