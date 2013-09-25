@@ -216,12 +216,18 @@ subsplit_publish()
 			fi
 
 			say " - syncing branch '${HEAD}'"
+			git checkout master >/dev/null 2>&1
 			git branch -D "$LOCAL_BRANCH" >/dev/null 2>&1
+			git branch -D "${LOCAL_BRANCH}-checkout" >/dev/null 2>&1
+			git checkout -b "${LOCAL_BRANCH}-checkout" "origin/${HEAD}" >/dev/null 2>&1
 			git subtree split -q --prefix="$SUBPATH" --branch="$LOCAL_BRANCH" "origin/${HEAD}" >/dev/null
 
 			if [ -n "$VERBOSE" ];
 			then
+				echo "${DEBUG} git checkout master >/dev/null 2>&1"
 				echo "${DEBUG} git branch -D \"$LOCAL_BRANCH\" >/dev/null 2>&1"
+				echo "${DEBUG} git branch -D \"${LOCAL_BRANCH}-checkout\" >/dev/null 2>&1"
+				echo "${DEBUG} git checkout -b \"${LOCAL_BRANCH}-checkout\" \"origin/${HEAD}\" >/dev/null 2>&1"
 				echo "${DEBUG} git subtree split -q --prefix=\"$SUBPATH\" --branch=\"$LOCAL_BRANCH\" \"origin/${HEAD}\" >/dev/null"
 			fi
 
@@ -323,11 +329,15 @@ subsplit_update()
 
 	git fetch -q origin
 	git fetch -q -t origin
+	git checkout master
+	git reset --hard origin/master
 
 	if [ -n "$VERBOSE" ];
 	then
 		echo "${DEBUG} git fetch -q origin"
 		echo "${DEBUG} git fetch -q -t origin"
+		echo "${DEBUG} git checkout master"
+		echo "${DEBUG} git reset --hard origin/master"
 	fi
 
 	popd >/dev/null
