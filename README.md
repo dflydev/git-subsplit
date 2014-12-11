@@ -19,6 +19,14 @@ git-subsplit can also be installed as a git command by:
 
     ./install.sh
 
+Caveats
+-------
+
+There is a known bug in the underlying git-subtree command that this script uses. Your disk will eventually run out of inodes because a cache directory isn't cleaned up after every run. I suggest you to create a cronjob to clean the cache directory every month:
+
+```
+0	0	1	*	*	 rm -rf <path to>/dflydev-git-subsplit-github-webhook/temp/$projectname/.subsplit/.git/subtree-cache/*
+```
 
 Hooks
 -----
