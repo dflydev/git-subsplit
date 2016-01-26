@@ -334,7 +334,6 @@ subsplit_update()
 
 	if [ -n "$VERBOSE" ];
 	then
-		echo "${DEBUG} git fetch -q origin"
 		echo "${DEBUG} git fetch -q -t origin"
 		echo "${DEBUG} git checkout master"
 		echo "${DEBUG} git reset --hard origin/master"
