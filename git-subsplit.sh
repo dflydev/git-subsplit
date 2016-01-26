@@ -330,14 +330,12 @@ subsplit_update()
 
 	say "Updating subsplit from origin"
 
-	git fetch -q origin
 	git fetch -q -t origin
 	git checkout master
 	git reset --hard origin/master
 
 	if [ -n "$VERBOSE" ];
 	then
-		echo "${DEBUG} git fetch -q origin"
 		echo "${DEBUG} git fetch -q -t origin"
 		echo "${DEBUG} git checkout master"
 		echo "${DEBUG} git reset --hard origin/master"
