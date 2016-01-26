@@ -327,7 +327,6 @@ subsplit_update()
 
 	say "Updating subsplit from origin"
 
-	git fetch -q origin
 	git fetch -q -t origin
 	git checkout master
 	git reset --hard origin/master
