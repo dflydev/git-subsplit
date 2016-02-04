@@ -345,4 +345,9 @@ subsplit_update()
 	popd >/dev/null
 }
 
+if [ "$(basename -- "$0")" == "git-subsplit.sh" ];
+then
+    shift
+fi
+
 subsplit_main "$@"
