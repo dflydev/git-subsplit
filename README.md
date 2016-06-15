@@ -143,6 +143,10 @@ Does not actually publish information to the subsplit repos for each
 subtree split. Instead, display the command and execute the command
 with `--dry-run` included.
 
+#### --debug
+
+Allows you to see the logic behind the scenes.
+
 
 Not Invented Here
 -----------------
