@@ -126,7 +126,7 @@ Do not sync any tags.
 #### --rebuild-tags
 
 Ordinarily tags will not be synced more than once. This is because in general
-tags should be considered or or less static.
+tags should be considered more or less static.
 
 If for some reason tags need to be resynced from scratch (history changed so
 tags might point to somewhere else) this flag will get the job done.
