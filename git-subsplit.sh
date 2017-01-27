@@ -71,6 +71,7 @@ subsplit_main()
 			--update) UPDATE=1 ;;
 			-n) DRY_RUN="--dry-run" ;;
 			--dry-run) DRY_RUN="--dry-run" ;;
+			--work-dir) WORK_DIR="$1"; shift ;;
 			--rebuild-tags) REBUILD_TAGS=1 ;;
 			--) break ;;
 			*) die "Unexpected option: $opt" ;;
@@ -343,5 +344,10 @@ subsplit_update()
 
 	popd >/dev/null
 }
+
+if [ "$(basename -- "$0")" == "git-subsplit.sh" ];
+then
+    shift
+fi
 
 subsplit_main "$@"
