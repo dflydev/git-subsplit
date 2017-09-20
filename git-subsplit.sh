@@ -26,6 +26,8 @@ tags=         only publish for listed tags instead of all tags
 no-tags       do not publish any tags
 update        fetch updates from repository before publishing
 rebuild-tags  rebuild all tags (as opposed to skipping tags that are already synced)
+use-splitsh   use the splitsh-lite binary instead of git git-subtree
+splitsh-bin   path of the splitsh-lite binary. Will try to guess it
 "
 eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
 
@@ -55,6 +57,8 @@ NO_TAGS=
 REBUILD_TAGS=
 DRY_RUN=
 VERBOSE=
+SPLITSH_BIN=$(which splitsh-lite)
+USE_SPLITSH=0
 
 subsplit_main()
 {
@@ -72,6 +76,7 @@ subsplit_main()
       -n) DRY_RUN="--dry-run" ;;
       --dry-run) DRY_RUN="--dry-run" ;;
       --rebuild-tags) REBUILD_TAGS=1 ;;
+      --use-splitsh) USE_SPLITSH=1 ;;
       --) break ;;
       *) die "Unexpected option: $opt" ;;
     esac
@@ -221,7 +226,12 @@ subsplit_publish()
       git branch -D "${LOCAL_BRANCH}" >/dev/null 2>&1
       git branch -D "${LOCAL_BRANCH}-checkout" >/dev/null 2>&1
       git checkout -b "${LOCAL_BRANCH}-checkout" "origin/${HEAD}" >/dev/null 2>&1
-      git subtree split -q --prefix="$SUBPATH" --branch="$LOCAL_BRANCH" "origin/${HEAD}" >/dev/null
+      if [ $USE_SPLITSH -eq 0 ]
+      then
+        git subtree split -q --prefix="$SUBPATH" --branch="$LOCAL_BRANCH" "origin/${HEAD}" >/dev/null
+      else
+        $SPLITSH_BIN -prefix="${SUBPATH}" -origin="refs/heads/${LOCAL_BRANCH}-checkout" -target="refs/heads/${LOCAL_BRANCH}"
+      fi
       RETURNCODE=$?
 
       if [ -n "$VERBOSE" ];
@@ -230,7 +240,12 @@ subsplit_publish()
         echo "${DEBUG} git branch -D \"${LOCAL_BRANCH}\" >/dev/null 2>&1"
         echo "${DEBUG} git branch -D \"${LOCAL_BRANCH}-checkout\" >/dev/null 2>&1"
         echo "${DEBUG} git checkout -b \"${LOCAL_BRANCH}-checkout\" \"origin/${HEAD}\" >/dev/null 2>&1"
-        echo "${DEBUG} git subtree split -q --prefix=\"$SUBPATH\" --branch=\"$LOCAL_BRANCH\" \"origin/${HEAD}\" >/dev/null"
+        if [ $USE_SPLITSH -eq 0 ]
+        then
+          echo "${DEBUG} git subtree split -q --prefix=\"$SUBPATH\" --branch=\"$LOCAL_BRANCH\" \"origin/${HEAD}\" >/dev/null"
+        else
+          echo "${DEBUG} ${SPLITSH_BIN} -prefix=\"${SUBPATH}\" -origin=\"refs/heads/${LOCAL_BRANCH}-checkout\" -target=\"refs/heads/${LOCAL_BRANCH}\""
+        fi
       fi
 
       if [ $RETURNCODE -eq 0 ]
@@ -252,73 +267,78 @@ subsplit_publish()
       fi
     done
 
-    for TAG in $TAGS
-    do
-      if [ -n "$VERBOSE" ];
-      then
-        echo "${DEBUG} git show-ref --quiet --verify -- \"refs/tags/${TAG}\""
-      fi
+    if [ "$USE_SPLITSH" -eq 0 ]
+    then
+      for TAG in $TAGS
+      do
+        if [ -n "$VERBOSE" ];
+        then
+          echo "${DEBUG} git show-ref --quiet --verify -- \"refs/tags/${TAG}\""
+        fi
 
-      if ! git show-ref --quiet --verify -- "refs/tags/${TAG}"
-      then
-        say " - skipping tag '${TAG}' (does not exist)"
-        continue
-      fi
-      LOCAL_TAG="${REMOTE_NAME}-tag-${TAG}"
-
-      if [ -n "$VERBOSE" ];
-      then
-        echo "${DEBUG} LOCAL_TAG="${LOCAL_TAG}""
-      fi
-
-      if git branch | grep "${LOCAL_TAG}$" >/dev/null && [ -z "$REBUILD_TAGS" ]
-      then
-        say " - skipping tag '${TAG}' (already synced)"
-        continue
-      fi
-
-      if [ -n "$VERBOSE" ];
-      then
-        echo "${DEBUG} git branch | grep \"${LOCAL_TAG}$\" >/dev/null && [ -z \"${REBUILD_TAGS}\" ]"
-      fi
-
-      say " - syncing tag '${TAG}'"
-      say " - deleting '${LOCAL_TAG}'"
-      git branch -D "$LOCAL_TAG" >/dev/null 2>&1
-
-      if [ -n "$VERBOSE" ];
-      then
-        echo "${DEBUG} git branch -D \"${LOCAL_TAG}\" >/dev/null 2>&1"
-      fi
-
-      say " - subtree split for '${TAG}'"
-      git subtree split -q --annotate="${ANNOTATE}" --prefix="$SUBPATH" --branch="$LOCAL_TAG" "$TAG" >/dev/null
-      RETURNCODE=$?
-
-      if [ -n "$VERBOSE" ];
-      then
-        echo "${DEBUG} git subtree split -q --annotate=\"${ANNOTATE}\" --prefix=\"$SUBPATH\" --branch=\"$LOCAL_TAG\" \"$TAG\" >/dev/null"
-      fi
-
-      say " - subtree split for '${TAG}' [DONE]"
-      if [ $RETURNCODE -eq 0 ]
-      then
-        PUSH_CMD="git push -q ${DRY_RUN} --force ${REMOTE_NAME} ${LOCAL_TAG}:refs/tags/${TAG}"
+        if ! git show-ref --quiet --verify -- "refs/tags/${TAG}"
+        then
+          say " - skipping tag '${TAG}' (does not exist)"
+          continue
+        fi
+        LOCAL_TAG="${REMOTE_NAME}-tag-${TAG}"
 
         if [ -n "$VERBOSE" ];
         then
-          echo "${DEBUG} PUSH_CMD=\"${PUSH_CMD}\""
+          echo "${DEBUG} LOCAL_TAG="${LOCAL_TAG}""
         fi
 
-        if [ -n "$DRY_RUN" ]
+        if git branch | grep "${LOCAL_TAG}$" >/dev/null && [ -z "$REBUILD_TAGS" ]
         then
-          echo \# $PUSH_CMD
-          $PUSH_CMD
-        else
-          $PUSH_CMD
+          say " - skipping tag '${TAG}' (already synced)"
+          continue
         fi
-      fi
-    done
+
+        if [ -n "$VERBOSE" ];
+        then
+          echo "${DEBUG} git branch | grep \"${LOCAL_TAG}$\" >/dev/null && [ -z \"${REBUILD_TAGS}\" ]"
+        fi
+
+        say " - syncing tag '${TAG}'"
+        say " - deleting '${LOCAL_TAG}'"
+        git branch -D "$LOCAL_TAG" >/dev/null 2>&1
+
+        if [ -n "$VERBOSE" ];
+        then
+          echo "${DEBUG} git branch -D \"${LOCAL_TAG}\" >/dev/null 2>&1"
+        fi
+
+        say " - subtree split for '${TAG}'"
+        git subtree split -q --annotate="${ANNOTATE}" --prefix="$SUBPATH" --branch="$LOCAL_TAG" "$TAG" >/dev/null
+        RETURNCODE=$?
+
+        if [ -n "$VERBOSE" ];
+        then
+          echo "${DEBUG} git subtree split -q --annotate=\"${ANNOTATE}\" --prefix=\"$SUBPATH\" --branch=\"$LOCAL_TAG\" \"$TAG\" >/dev/null"
+        fi
+
+        say " - subtree split for '${TAG}' [DONE]"
+        if [ $RETURNCODE -eq 0 ]
+        then
+          PUSH_CMD="git push -q ${DRY_RUN} --force ${REMOTE_NAME} ${LOCAL_TAG}:refs/tags/${TAG}"
+
+          if [ -n "$VERBOSE" ];
+          then
+            echo "${DEBUG} PUSH_CMD=\"${PUSH_CMD}\""
+          fi
+
+          if [ -n "$DRY_RUN" ]
+          then
+            echo \# $PUSH_CMD
+            $PUSH_CMD
+          else
+            $PUSH_CMD
+          fi
+        fi
+      done
+    else
+      echo "${DEBUG} tags are not supported with Splitsh-lite - skipping"
+    fi
   done
 
   popd >/dev/null
