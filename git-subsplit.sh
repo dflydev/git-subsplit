@@ -218,7 +218,7 @@ subsplit_publish()
       say " - syncing branch '${HEAD}'"
 
       git checkout master >/dev/null 2>&1
-      git branch -D "$LOCAL_BRANCH" >/dev/null 2>&1
+      git branch -D "${LOCAL_BRANCH}" >/dev/null 2>&1
       git branch -D "${LOCAL_BRANCH}-checkout" >/dev/null 2>&1
       git checkout -b "${LOCAL_BRANCH}-checkout" "origin/${HEAD}" >/dev/null 2>&1
       git subtree split -q --prefix="$SUBPATH" --branch="$LOCAL_BRANCH" "origin/${HEAD}" >/dev/null
@@ -227,7 +227,7 @@ subsplit_publish()
       if [ -n "$VERBOSE" ];
       then
         echo "${DEBUG} git checkout master >/dev/null 2>&1"
-        echo "${DEBUG} git branch -D \"$LOCAL_BRANCH\" >/dev/null 2>&1"
+        echo "${DEBUG} git branch -D \"${LOCAL_BRANCH}\" >/dev/null 2>&1"
         echo "${DEBUG} git branch -D \"${LOCAL_BRANCH}-checkout\" >/dev/null 2>&1"
         echo "${DEBUG} git checkout -b \"${LOCAL_BRANCH}-checkout\" \"origin/${HEAD}\" >/dev/null 2>&1"
         echo "${DEBUG} git subtree split -q --prefix=\"$SUBPATH\" --branch=\"$LOCAL_BRANCH\" \"origin/${HEAD}\" >/dev/null"
