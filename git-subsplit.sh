@@ -21,6 +21,7 @@ work-dir      directory that contains the subsplit working directory
 
  options for 'publish'
 heads=        only publish for listed heads instead of all heads
+search-heads= search and only publish matching heads instead of all heads (grep pattern)
 no-heads      do not publish any heads
 tags=         only publish for listed tags instead of all tags
 no-tags       do not publish any tags
@@ -49,6 +50,7 @@ SPLITS=
 REPO_URL=
 WORK_DIR="${PWD}/.subsplit"
 HEADS=
+SEARCH_HEADS=
 NO_HEADS=
 TAGS=
 NO_TAGS=
@@ -65,6 +67,7 @@ subsplit_main()
 			-q) QUIET=1 ;;
 			--debug) VERBOSE=1 ;;
 			--heads) HEADS="$1"; shift ;;
+			--search-heads) SEARCH_HEADS="$1"; shift ;;
 			--no-heads) NO_HEADS=1 ;;
 			--tags) TAGS="$1"; shift ;;
 			--no-tags) NO_TAGS=1 ;;
@@ -148,10 +151,22 @@ subsplit_publish()
 		subsplit_update
 	fi
 
-	if [ -z "$HEADS" ] && [ -z "$NO_HEADS" ]
+	if [ -z "$HEADS" ] && [ -z "$NO_HEADS" ] && [ -z "$SEARCH_HEADS" ]
 	then
 		# If heads are not specified and we want heads, discover them.
 		HEADS="$(git ls-remote origin 2>/dev/null | grep "refs/heads/" | cut -f3- -d/)"
+
+		if [ -n "$VERBOSE" ];
+		then
+			echo "${DEBUG} HEADS=\"${HEADS}\""
+		fi
+	fi
+
+  # search for matching heads
+	if [ ! -z "$SEARCH_HEADS" ] && [ -z "$HEADS" ] && [ -z "$NO_HEADS" ]
+	then
+		# If heads are not specified and we want heads, discover them.
+		HEADS="$(git ls-remote origin 2>/dev/null | grep "refs/heads/" | grep "${SEARCH_HEADS}" | cut -f3- -d/)"
 
 		if [ -n "$VERBOSE" ];
 		then
