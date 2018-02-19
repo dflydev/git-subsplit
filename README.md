@@ -107,6 +107,18 @@ branches the upstream repository knows about.
 Do not sync any heads.
 
 
+#### --search-heads
+
+To search for a list of possible heads and publish only the matches.
+
+    --search-heads="refs/heads/master\|refs/heads/develop\|refs/heads/release-"
+
+The above will only publish branches that are either `master`, `develop`
+or any other branch of the form `release-*`.
+
+[Grep](https://www.gnu.org/savannah-checkouts/gnu/grep/manual/grep.html) patterns will be applied.
+
+
 #### --tags=\<tags\>
 
 To specify a list of tags (instead of letting git-subsplit discover them
