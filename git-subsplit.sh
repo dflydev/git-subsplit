@@ -26,6 +26,7 @@ tags=         only publish for listed tags instead of all tags
 no-tags       do not publish any tags
 update        fetch updates from repository before publishing
 rebuild-tags  rebuild all tags (as opposed to skipping tags that are already synced)
+no-force      do not force push git branches or tags
 "
 eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
 
@@ -55,6 +56,7 @@ NO_TAGS=
 REBUILD_TAGS=
 DRY_RUN=
 VERBOSE=
+GIT_FORCE="--force"
 
 subsplit_main()
 {
@@ -72,6 +74,7 @@ subsplit_main()
 			-n) DRY_RUN="--dry-run" ;;
 			--dry-run) DRY_RUN="--dry-run" ;;
 			--rebuild-tags) REBUILD_TAGS=1 ;;
+			--no-force) GIT_FORCE="" ;;
 			--) break ;;
 			*) die "Unexpected option: $opt" ;;
 		esac
@@ -235,7 +238,7 @@ subsplit_publish()
 
 			if [ $RETURNCODE -eq 0 ]
 			then
-				PUSH_CMD="git push -q ${DRY_RUN} --force $REMOTE_NAME ${LOCAL_BRANCH}:${HEAD}"
+				PUSH_CMD="git push -q ${DRY_RUN} ${GIT_FORCE} $REMOTE_NAME ${LOCAL_BRANCH}:${HEAD}"
 
 				if [ -n "$VERBOSE" ];
 				then
@@ -303,7 +306,7 @@ subsplit_publish()
 			say " - subtree split for '${TAG}' [DONE]"
 			if [ $RETURNCODE -eq 0 ]
 			then
-				PUSH_CMD="git push -q ${DRY_RUN} --force ${REMOTE_NAME} ${LOCAL_TAG}:refs/tags/${TAG}"
+				PUSH_CMD="git push -q ${DRY_RUN} ${GIT_FORCE} ${REMOTE_NAME} ${LOCAL_TAG}:refs/tags/${TAG}"
 
 				if [ -n "$VERBOSE" ];
 				then
